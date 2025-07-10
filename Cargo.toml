@@ -13,7 +13,7 @@ scalable_cuckoo_filter = { version = "0.4.0" }
 fxhash = { version = "0.2.1" }
 bio = { version = "2.3.0" }
 flate2 = { version = "1.1.1" }
-tinyvec = { version = "1.9.0", features = ["alloc"] }
+dashmap = { version = "6.1.0" }
 
 [profile.profiling]
 inherits = "release"

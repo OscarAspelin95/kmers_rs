@@ -16,7 +16,9 @@ pub fn mm_hash64(kmer: u64) -> u64 {
 }
 
 pub fn kmerize(k: usize, ds_factor: u64, nt_string: &[u8]) -> HashSet<u64> {
-    assert!(k <= nt_string.len());
+    if k >= nt_string.len() {
+        panic!("kmer: {k}, nt_string: {}", nt_string.len());
+    };
 
     // Forward related kmer stuff
     let mut kmer_forward: u64 = 0;

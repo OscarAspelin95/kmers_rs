@@ -8,12 +8,12 @@ mod kmers_vanilla;
 
 use clap::Parser;
 
+use dashmap::{DashMap, DashSet};
 use fastx::{fasta_plain_reader, fastq_gz_reader};
 use kmers::generate_kmers;
 use log::info;
 use rayon::prelude::*;
 use simple_logger::SimpleLogger;
-use std::sync::{Arc, Mutex};
 use std::{collections::HashSet, path::PathBuf};
 
 /// The idea with this crate is to query a fastq file against a fasta file
@@ -47,43 +47,31 @@ fn main() {
     let fastq_reader = fastq_gz_reader(args.fastq);
 
     info!("Generating fasta kmers...");
-    let fasta_hashset = Arc::new(Mutex::new(HashSet::with_capacity(1_000_000)));
+    let fasta_dashmap: DashMap<String, HashSet<u64>> = DashMap::with_capacity(100_000);
     fasta_reader.records().par_bridge().for_each(|record| {
         let rec = record.unwrap();
 
+        if rec.seq().len() < 200 {
+            return;
+        }
         let nt_string = rec.seq();
-
-        // TODO - do something with this.
         let fasta_kmers = generate_kmers(nt_string, kmer_size, ds_factor);
 
-        let fhs = fasta_hashset.clone();
-        let mut f = fhs.lock().unwrap();
-        f.extend(fasta_kmers);
+        fasta_dashmap.insert(rec.id().to_owned(), fasta_kmers);
     });
 
     // Process reads in parallel.
     info!("Generating fastq kmers...");
-    let fastq_hashset: Arc<Mutex<HashSet<u64>>> =
-        Arc::new(Mutex::new(HashSet::with_capacity(100_000_000)));
+    let fastq_dashmap: DashMap<String, HashSet<u64>> = DashMap::with_capacity(100_000);
     fastq_reader.records().par_bridge().for_each(|record| {
         let rec = record.unwrap();
 
+        if rec.seq().len() < 1000 {
+            return;
+        }
         let nt_string = rec.seq();
-        // TODO - do something with this.
         let fastq_kmers = generate_kmers(nt_string, kmer_size, ds_factor);
 
-        let fhs = fastq_hashset.clone();
-        let mut f = fhs.lock().unwrap();
-        f.extend(fastq_kmers);
-    });
-
-    println!("Fasta kmers:");
-    fasta_hashset.lock().unwrap().iter().for_each(|kmer| {
-        println!("{:?}", kmer);
-    });
-
-    println!("Fastq kmers:");
-    fastq_hashset.lock().unwrap().iter().for_each(|kmer| {
-        println!("{:?}", kmer);
+        fastq_dashmap.insert(rec.id().to_owned(), fastq_kmers);
     });
 }

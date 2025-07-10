@@ -62,12 +62,12 @@ pub fn print_nt_string(kmer: u64, k: usize) {
 /// with SIMD kmerization and the last chunk with a non-SIMD kmerization.
 #[inline]
 pub fn chunk_pos(seq_len: usize, num_chunks: usize, kmer_size: usize) -> Vec<(usize, usize)> {
-    let chunk_len = (seq_len + ((num_chunks - 1) * (kmer_size - 1))) / num_chunks;
+    let chunk_len = (seq_len + ((num_chunks - 1) * (kmer_size - 1))) / (num_chunks + 1);
 
     if kmer_size > chunk_len {
         panic!(
             "Kmer size {} cannot be larger than chunk length {}. Sequence is too short to chunk given the kmer size.",
-            num_chunks, kmer_size
+            kmer_size, chunk_len
         );
     }
 
