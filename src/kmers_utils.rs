@@ -17,28 +17,35 @@ pub const BYTE_TO_SEQ: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-// #[inline]
-// fn decode(byte: u64) -> u8 {
-//     match byte {
-//         0 => return b'A',
-//         1 => return b'C',
-//         2 => return b'G',
-//         3 => return b'T',
-//         _ => panic!("Invalid nucleotide."),
-//     };
-// }
+#[inline]
+fn decode(byte: u64) -> u8 {
+    match byte {
+        0 => return b'A',
+        1 => return b'C',
+        2 => return b'G',
+        3 => return b'T',
+        _ => panic!("Invalid nucleotide."),
+    };
+}
 
-// /// Print a u64 encoded nucleotide with some bit manipulation.
-// pub fn print_nt_string(kmer: u64, k: usize) {
-//     let mut bytes = vec![];
-//     let mask = 3;
-//     for i in 0..k {
-//         let val = kmer >> 2 * i;
-//         let val = val & mask;
-//         bytes.push(decode(val));
-//     }
-//     dbg!(std::str::from_utf8(&bytes.into_iter().rev().collect::<Vec<u8>>()).unwrap());
-// }
+/// Print a u64 encoded nucleotide with some bit manipulation.
+pub fn print_nt_string(kmer: u64, k: usize) {
+    let mut result = String::with_capacity(k);
+    for i in 0..k {
+        // Shift to extract the 2 bits corresponding to the current nucleotide
+        let shift = 2 * (k - i - 1);
+        let bits = (kmer >> shift) & 0b11;
+        let base = match bits {
+            0b00 => 'A',
+            0b01 => 'C',
+            0b10 => 'G',
+            0b11 => 'T',
+            _ => unreachable!(),
+        };
+        result.push(base);
+    }
+    println!("{}", result);
+}
 
 /// In order to fully use the SIMD implementation, we need to take a nt string and chop it up into
 /// equal length substrings that we can kmerize in parallel. However, in order to make sure we

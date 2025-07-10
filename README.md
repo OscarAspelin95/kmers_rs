@@ -1,15 +1,17 @@
-# README #
 
-Repository for generating kmers efficiently with Rust.
+# Introduction
+Very early work in progress for generating (Min Frac Hash) kmers from fastq and fasta files.
 
-NOTE - requires Rust nightly due to the use of the std::simd module.
+It uses a rather interesting approach (inspired by https://github.com/bluenote-1577/sylph), for generating kmers.
+  1. Uses rayon for parallel processing of reads/contigs.
+  2. Each read/contig is chopped into 64 equal size chunks.
+  3. These 64 chunks are processed in parallel using Rust SIMD (https://doc.rust-lang.org/std/simd/type.u64x64.html).
+  4. Since sequences are not always divisible by 64, the residual chunk is processed with a non-SIMD implementation.
 
+# Note
+Required Rust Nightly since it uses the simd module.
 
-
-### How do I get set up? ###
-
-* Requires Rust nightly:
-    * Run "rustup toolchain install nightly"
-    * Run "rustup override set nightly" in this directory.
-* Run "cargo build" for generating a debug binary.
-* Run "cargo build --release" for generating the release binary.
+# TODO
+* Currently generates kmers, but does not store them anywhere.
+* Want some kind of containment ID between fasta contigs and fastq reads.
+* ...
