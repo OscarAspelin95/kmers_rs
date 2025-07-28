@@ -1,6 +1,6 @@
 
 # Introduction
-Very early work in progress for generating (Min Frac Hash) kmers from fastq and fasta files.
+🚧 Work in progress for generating (Min Frac Hash) kmers from fastq and fasta files.
 
 It uses a rather interesting approach (inspired by https://github.com/bluenote-1577/sylph), for generating kmers.
   1. Uses rayon for parallel processing of reads/contigs.
