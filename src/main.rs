@@ -16,8 +16,6 @@ use rayon::prelude::*;
 use simple_logger::SimpleLogger;
 use std::{collections::HashSet, path::PathBuf};
 
-/// The idea with this crate is to query a fastq file against a fasta file
-/// to check the coverage of contigs.
 #[derive(Parser, Debug)]
 #[command(version = "0.0.1", about = "Placeholder.", long_about = "Placeholder.")]
 struct Args {

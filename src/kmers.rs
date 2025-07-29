@@ -21,7 +21,7 @@ fn generate_simd_kmers(
 
     assert_eq!(simd_nt_chunks.len(), 64);
 
-    let kmer_hash_set = simd_u64_64_encoding(kmer_size, simd_nt_chunks, ds_factor);
+    let kmer_hash_set = simd_u64_64_encoding(kmer_size, &simd_nt_chunks, ds_factor);
 
     return kmer_hash_set;
 }

@@ -6,8 +6,6 @@ use std::{
     u64,
 };
 
-/// Should be benchmarked against the
-/// original sylph implementation but seems to work.
 #[inline]
 fn mm_hash64_simd(kmer: Simd<u64, 64>) -> Simd<u64, 64> {
     let mut key = kmer;
@@ -29,7 +27,7 @@ fn mm_hash64_simd(kmer: Simd<u64, 64>) -> Simd<u64, 64> {
 #[inline]
 pub fn simd_u64_64_encoding(
     kmer_size: usize,
-    simd_nt_chunks: Vec<&[u8]>,
+    simd_nt_chunks: &Vec<&[u8]>,
     ds_factor: u64,
 ) -> HashSet<u64> {
     // Initialize empty forward and reverse kmer.
@@ -52,14 +50,6 @@ pub fn simd_u64_64_encoding(
     let mut hash_set = HashSet::with_capacity(hash_capacity);
 
     for i in 0..chunk_len {
-        // Houston, we have a problem. The SIMD implementation is very fast. In fact, it is
-        // so fast that this closure becomes the bottleneck.
-        //
-        // One better way could be to pre-compute all SIMDs beforehand.
-        //
-        // We have some type casting u8 to usize to u64 that we want to either
-        // * Do in parallel
-        // * Avoid all together (not sure this is possible).
         let nt_array: Vec<u64> = simd_nt_chunks
             .iter()
             .map(|chunk| {
@@ -80,8 +70,8 @@ pub fn simd_u64_64_encoding(
         kmer_reverse = kmer_reverse >> 2;
         kmer_reverse = kmer_reverse.bitor(nt_rev_simd << shift);
 
-        // We have a valid kmer.
-        // HOWEVER, we need to be able to handle N.
+        // We currently don't have any good way to handle Ns when kmerizing
+        // 64 chunks at the same time.
         if i >= kmer_size - 1 {
             // Get the lexicographically smallest kmer out of fws/rev.
             let smallest = kmer_fwd.simd_min(kmer_reverse);
